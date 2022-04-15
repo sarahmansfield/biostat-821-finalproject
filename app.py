@@ -12,9 +12,16 @@ visit http://127.0.0.1:8050/ in your web browser.
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+import numpy as np
 import plotly.express as px
-import pandas as pd
-import datetime
+from PIL import Image
+import cv2
+import base64
+import io
+import json
+
+# cv2.namedWindow("image")
+# cv2.setMouseCallback("image", get_color)
 
 dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/\
         dash-bootstrap-templates@V1.0.4/dbc.min.css"
@@ -32,7 +39,7 @@ app.layout = html.Div(
                 dbc.Col(  # sidebar
                     [
                         html.H6(
-                            "Upload an image and click anywhere to get \
+                            "Upload an image and click anywhere on it to get \
                                 information about the selected color!",
                             style={"margin": "10px"},
                         ),
@@ -78,13 +85,17 @@ app.layout = html.Div(
 
 def parse_contents(contents):
     """Parse uploaded file and return image."""
+    global img
+    content_type, content_string = contents.split(",")
+    img = stringToRGB(content_string)
+    return dcc.Graph(figure=px.imshow(img))
     return html.Div(
         [
             # html.H5(filename),
             # html.H6(datetime.datetime.fromtimestamp(date)),
             # HTML images accept base64 encoded strings in the same format
             # that is supplied by the upload
-            html.Img(src=contents, style={"height": "500px"}),
+            html.Img(src=contents, style={"width": "100%", "height": "500px"}),
             # html.Hr(),
             # html.Div("Raw Content"),
             # html.Pre(
@@ -106,6 +117,14 @@ def update_output(list_of_contents):
     if list_of_contents is not None:
         children = [parse_contents(c) for c in list_of_contents]
         return children
+
+
+def stringToRGB(base64_string):
+    """Take in base64 string and return cv image."""
+    imgdata = base64.b64decode(str(base64_string))
+    image = Image.open(io.BytesIO(imgdata))
+    return image
+    return cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
 
 
 if __name__ == "__main__":
