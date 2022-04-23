@@ -1,0 +1,70 @@
+#################################################################
+#
+# Comprehensive list of color names and their color space coordinates
+#
+# 9,284 colors
+#
+# Sources: bang-v2, colorhexa, crayola, n3, 
+#          ntc, pantone, raveling, resene, rgb.txt,
+#          steve.hollasch, wikipedia, xkcd
+#
+# Martin Krzywinski
+# http://mkweb.bcgsc.ca/colornames
+# v0.33
+# 16 Oct 2017
+#
+# The fields are
+#
+# rgb R G B hex HEX h s v H S V xyz X Y Z lab L A B lch L C H cmyk C M Y K 
+#   NEIGHBOUR_STR NUM_NEIGHBOURS_MAXDE WORD_TAGS
+#
+# where
+#
+#    R G B components in RGB color space
+#      HEX encoding of RGB values (without leading #)
+#    H S V components in HSV color space
+#    X Y Z components in XYZ color space
+#    L A B components in Lab color space
+#    L C H components in LCH (LCHab) color space
+#  C M Y K components in CMYK color space
+#
+#  NEIGHBOUR_STR list of 5 nearest colors from the color name database (see below)
+#    as a list using : separator
+#
+#    n1:n2:n3:n4:n5
+#
+#  where each ni entry is
+#
+#    NAME[IDX][R,G,B](DELTAE)
+#
+#    NAME   name of neighbour
+#    IDX    index of neighbour, as used in the color name lookup file
+#    R G B   components of neighbour in RGB color space
+#    deltaE  distance between the color and the neighbour in Lab color space
+#
+#  NUM_NEIGHBOURS_MAXDE number of neighbours with deltaE <= 5. These are used for WORDS_TAGS below
+#
+#  WORD_TAGS list of unique words seen in names of neighbours with deltaE < 5. If
+#  no neighbours within deltaE < 5 are found, the nearest neighbour is used.
+#
+#
+# The WORD_TAGS are your best bet for the name of the RGB color. 
+# Depending on the neighbours, similar hues may appear (e.g. red, rose).
+#
+################################################################
+#
+# The color name database is always available at
+#
+# http://mkweb.bcgsc.ca/colornames/color.names.txt
+#
+################################################################
+0 color1 rgb 200 137 104 hex #C88968 hsv 57 49 96 xyz 0.71 0.81 0.31 lab 92 -12 55 lch 92 56 103 cmyk 0 3 47 4 manz[5518][238,239,120](4.5):texas[8315][236,230,126](4.5):sunny[8138][242,242,122](4.6):spring_fever[7916][227,223,110](5.1):PMS393[470][242,239,135](5.2) 3 PMS393:fever:manz:spring:sunny:texas
+1 color2 rgb 155 79 252 hex #9B4FFC hsv 326 30 100 xyz 0.71 0.59 0.77 lab 81 34 -10 lch 81 35 343 cmyk 0 30 13 0 lavender_pink[4945][251,174,210](3.7):PMS236[194][249,175,211](4.1):lavender[4932][252,180,213](5.0):powder_pink[6802][255,178,208](6.3):cotton_candy[2553][255,183,213](6.5) 3 PMS236:candy:cotton:powder:lavender:pink
+2 color3 rgb 255 16 77 hex #FF104D hsv 30 31 100 xyz 0.74 0.74 0.52 lab 89 8 24 lch 89 26 72 cmyk 0 15 31 0 feldspar[3573][253,213,177](1.7):light_apricot[5001][253,213,177](1.7):apricot[1091][253,217,181](2.2):sandy_beach[7474][254,219,183](2.2):peach_puff[6550][255,218,185](3.0) 15 light:apricot:beach:feldspar:puff:sandy:peach
+3 color4 rgb 121 182 105 hex #79B669 hsv 202 31 80 xyz 0.39 0.44 0.64 lab 72 -8 -16 lch 72 18 243 cmyk 25 9 0 20 PMS543[683][147,183,209](2.4):dark_sky_blue[2883][140,190,214](3.7):light_grey_blue[5123][157,188,212](4.4):nepal[6022][142,171,193](4.4):PMS550[701][135,175,191](4.7) 5 light:dark:PMS543:PMS550:nepal:sky:blue:grey
+4 color5 rgb 155 255 255 hex #9BFFFF hsv 60 7 100 xyz 0.92 0.99 0.94 lab 100 -3 9 lch 100 9 109 cmyk 0 0 7 0 apricot_white[1095][255,254,236](1.0):buttery_white[1962][255,252,234](1.4):half_pearl_lusta[4367][255,252,234](1.4):travertine[8460][255,253,232](1.4):ivory[4700][255,255,240](2.0) 36 apricot:buttery:half:ivory:lusta:pearl:travertine:white
+5 color6 rgb 40 214 184 hex #28D6B8 hsv 32 40 55 xyz 0.18 0.18 0.11 lab 50 6 20 lch 50 21 74 cmyk 0 10 22 45 burlywood[1914][139,115,85](1.0):lodestar[5327][138,114,82](1.4):french_bistre[3743][133,109,77](2.4):triple_rickshaw[8514][144,115,89](2.4):ignition[4608][139,115,90](3.0) 15 bistre:burlywood:french:ignition:lodestar:rickshaw:triple
+6 color7 rgb 243 223 178 hex #F3DFB2 hsv 343 89 84 xyz 0.29 0.15 0.09 lab 46 70 21 lch 46 73 17 cmyk 0 75 53 16 spanish_carmine[7870][209,0,71](3.0):ruby[7362][202,1,71](3.2):ua_red[8624][217,0,76](3.2):PMS206[164][211,5,71](3.3):debian_red[2945][215,10,83](3.6) 5 PMS206:carmine:debian:ruby:spanish:ua:red
+7 color8 rgb 3 6 140 hex #03068C hsv 98 47 30 xyz 0.04 0.06 0.03 lab 30 -17 19 lch 30 25 132 cmyk 9 0 14 70 fervent_green[3589][57,79,43](1.4):dark_green[2764][47,79,47](4.5):feverpitch[3594][45,67,37](5.4):clover[2389][71,86,47](6.0):PMS5743[745][63,73,38](6.2) 2 dark:PMS5743:clover:fervent:feverpitch:green
+8 color9 rgb 154 8 190 hex #9A08BE hsv 251 40 31 xyz 0.04 0.03 0.08 lab 22 11 -19 lch 22 22 301 cmyk 10 13 0 69 wicked[9101][54,47,80](1.0):midnight_blue[5721][47,47,79](2.4):lucky_point[5355][41,45,79](3.5):cherry_pie[2264][55,45,82](3.7):filmpro_purple[3618][54,42,77](3.7) 9 cherry:filmpro:lucky:midnight:pie:point:wicked:blue:purple
+9 color10 rgb 74 101 35 hex #4A6523 hsv 213 26 92 xyz 0.53 0.57 0.87 lab 80 -2 -20 lch 80 20 265 cmyk 24 13 0 8 pale_cornflower_blue[6327][171,205,239](2.2):time_out[8367][170,194,227](2.4):baby_blue_eyes[1241][161,202,241](4.5):oxymoron[6280][156,191,227](4.6):light_steel_blue[5216][188,210,238](5.1) 4 pale:light:baby:cornflower:eyes:out:oxymoron:steel:time:blue
