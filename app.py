@@ -1,9 +1,9 @@
 """
-Color Picker - BIOSTAT 821 final project.
+Color Matcher - BIOSTAT 821 final project.
 
-Color Picker is a Python-based application that allows the user to upload
-an image and identify the closest color name (and its corresponding hex code)
-by clicking on different points within the image.
+Color Matcher is a Python-based application that allows the user to upload
+an image and identify the closest color and its corresponding information
+(hex code, RGB values, etc) by clicking on different points within the image.
 
 Run this app with `python app.py` and
 visit http://127.0.0.1:8050/ in your web browser.
@@ -11,18 +11,19 @@ visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
 from dash import Dash, dcc, html
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 import numpy as np
 import plotly.express as px
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import cv2
 import base64
 import io
 import math
 import sqlite3
 from os.path import exists
+from typing import Tuple, Any
 
 # additional trace of transparent points that are scattered
 # uniformly across the figure
@@ -40,43 +41,82 @@ fig = px.line(
     .update_traces(marker_color="rgba(0,0,0,0)")
     .data
 )
+# global image - we want to be able to access the image across functions
+img = np.zeros([100, 100, 3], dtype=np.uint8)
+img.fill(255)
+img = Image.fromarray(img)
 
 
 dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/\
         dash-bootstrap-templates@V1.0.4/dbc.min.css"
 app = Dash(
     __name__,
-    external_stylesheets=[dbc.themes.MINTY, dbc_css],
+    external_stylesheets=[dbc.themes.JOURNAL, dbc_css],
     suppress_callback_exceptions=True,
+)
+
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(
+            dbc.NavLink(
+                "GitHub",
+                href="https://github.com/sarahmansfield",
+            )
+        ),
+        dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem("More pages", header=True),
+                dbc.DropdownMenuItem("Dash", href="https://dash.plotly.com/"),
+                dbc.DropdownMenuItem(
+                    "Source Code",
+                    href="https://github.com/sarahmansfield/biostat-821-finalproject",  # noqa
+                ),
+            ],
+            nav=True,
+            in_navbar=True,
+            label="More",
+        ),
+    ],
+    brand="COLOR MATCHER",
+    color="primary",
+    dark=True,
 )
 
 app.layout = html.Div(
     [
-        html.H2(
-            "Color Picker",
-            className="bg-primary text-white p-2 \
-            mb-2 text-center",
-        ),
+        navbar,
         dbc.Row(
             [
                 dbc.Col(  # sidebar
                     [
-                        html.H6(
-                            "Upload an image and click anywhere on it to get \
-                                information about the selected color!",
+                        dbc.Card(
+                            [
+                                dbc.CardImg(
+                                    src="/static/header.jpg",
+                                    top=True,
+                                ),
+                                dbc.CardBody(
+                                    [
+                                        html.H6(
+                                            "Closest color match:",
+                                            className="card-title",
+                                        ),
+                                        html.Div(id="colormatch"),
+                                    ]
+                                ),
+                            ],
                             style={"margin": "10px"},
                         ),
-                        html.Hr(),
-                        html.H6(
-                            "Closest color match:",
-                            style={"margin": "10px"},
-                        ),
-                        html.Div(id="where"),
                     ],
                     width={"size": 5},
                 ),
                 dbc.Col(  # main panel
                     [
+                        html.H5(
+                            "Upload an image and click anywhere on it to get \
+                                 information about the selected color!",
+                            style={"margin": "10px", "textAlign": "center"},
+                        ),
                         dcc.Upload(
                             id="upload-image",
                             children=html.Div(
@@ -92,12 +132,13 @@ app.layout = html.Div(
                                 "textAlign": "center",
                                 "margin": "10px",
                             },
-                            # Allow multiple files to be uploaded
-                            multiple=True,
                         ),
-                        html.Div(
-                            id="output-image-upload",
-                            style={"textAlign": "center"},  # noqa
+                        dbc.Spinner(
+                            html.Div(
+                                id="output-image-upload",
+                                style={"textAlign": "center"},  # noqa
+                            ),
+                            color="primary",
                         ),
                     ],
                     width={"size": 7},
@@ -108,12 +149,20 @@ app.layout = html.Div(
 )
 
 
-def parse_contents(contents):
-    """Parse uploaded file and return image."""
+def parse_contents(contents: str) -> html.Div:
+    """Parse uploaded image file and return image."""
     global img
     content_type, content_string = contents.split(",")
     imgdata = base64.b64decode(content_string)
-    img = Image.open(io.BytesIO(imgdata))
+    try:
+        img = Image.open(io.BytesIO(imgdata))
+    except UnidentifiedImageError:
+        return dbc.Alert(
+            "Invalid file! Please upload a valid image file.",
+            color="danger",
+            dismissable=True,
+            style={"width": "97%", "margin": "10px"},
+        )
     fig = px.imshow(img)
     fig.update_xaxes(visible=False, showticklabels=False)
     fig.update_yaxes(visible=False, showticklabels=False)
@@ -124,49 +173,44 @@ def parse_contents(contents):
     Output("output-image-upload", "children"),
     Input("upload-image", "contents"),
 )
-def update_output(list_of_contents):
+def update_output(contents: str) -> html.Div:
     """Update uploaded image."""
-    if list_of_contents is not None:
-        children = [parse_contents(c) for c in list_of_contents]
+    if contents is not None:
+        children = parse_contents(contents)
         return children
 
 
-def stringToRGB(base64_string):
-    """Take in base64 string and return cv image."""
-    imgdata = base64.b64decode(str(base64_string))
-    image = Image.open(io.BytesIO(imgdata))
-    return image
-
-
-@app.callback(Output("where", "children"), Input("graph", "clickData"))
-def click(clickData):
-    """Return coordinates of point where image is clicked."""
+@app.callback(Output("colormatch", "children"), Input("graph", "clickData"))
+def click(clickData: dict[str, list[dict[str, Any]]]) -> html.Div:
+    """Return colorpicker element with information about color match \
+        corresponding to point where image is clicked."""
     if not clickData:
         raise dash.exceptions.PreventUpdate
     coordinates = {k: clickData["points"][0][k] for k in ["x", "y"]}
     color_name, r, g, b, hexcode = get_color(img, coordinates)
-    rgb = tuple([r, g, b])
     return html.Div(
         [
             daq.ColorPicker(
-                id="my-color-picker-1",
+                id="colorpicker",
                 label=color_name,
                 value=dict(hex=hexcode),  # noqa
-            ),
-            html.Div(
-                "RGB Values (R, G, B): " + str(rgb),
-                style={"textAlign": "center"},  # noqa
             ),
         ],
         style={"margin": "10px"},
     )
 
 
-def get_color(img, coordinates):
-    """Get closest color match to a given point on an image."""
+def get_color(
+    img: Image, coordinates: dict[str, int]
+) -> Tuple[str, int, int, int, str]:
+    """Return color name, RGB values, and hex code of the closest \
+        color match to a given point on an image."""
     cv_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    bounds = cv_img.shape
     x = coordinates["x"]
     y = coordinates["y"]
+    if y > bounds[0] or x > bounds[1]:
+        raise IndexError("Index is out of bounds")
     b, g, r = cv_img[y, x]
     b = int(b)
     g = int(g)
@@ -203,8 +247,8 @@ def parse_data(filename: str) -> None:
     cur = con.cursor()
     # create and populate data table
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS colors (color_name TEXT PRIMARY KEY, \
-            r INT, g INT, b INT, hex TEXT)"
+        "CREATE TABLE IF NOT EXISTS colors (color_name TEXT, \
+            r INT, g INT, b INT, hex TEXT PRIMARY KEY)"
     )
     for line in lines:
         vals = line.split()[1:8]
@@ -223,4 +267,4 @@ def parse_data(filename: str) -> None:
 if __name__ == "__main__":
     if not exists("data/color_data.db"):
         parse_data("data/color.names.txt")
-    app.run_server(debug=True)
+    app.run_server(debug=False)
